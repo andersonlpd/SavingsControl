@@ -19,6 +19,8 @@ class RecoveryCodeTests(TestCase):
             username="owner", password="a-long-test-password"
         )
         self.client.force_login(user)
+        response = self.client.get("/account/login/")
+        self.assertRedirects(response, "/dashboard/", fetch_redirect_response=False)
         response = self.client.get("/account/two_factor/setup/")
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "Provide a template named")
