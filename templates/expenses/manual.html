@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}Lançar gasto{% endblock %}
+{% block content %}<p class="eyebrow">Gastos</p><h1>Lançar gasto manual</h1><section class="panel narrow"><form method="post">{% csrf_token %}{% include "partials/form_fields.html" %}<button class="button" type="submit">Registrar gasto</button></form></section>{% endblock %}

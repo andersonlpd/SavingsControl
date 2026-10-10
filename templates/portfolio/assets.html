@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}Ativos{% endblock %}
+{% block content %}<p class="eyebrow">Carteira</p><h1>Ativos</h1><div class="content-grid"><section class="panel"><h2>Cadastrar ativo</h2><form method="post">{% csrf_token %}{% include "partials/form_fields.html" %}<button class="button" type="submit">Salvar ativo</button></form></section><section class="panel"><h2>Ativos cadastrados</h2>{% if assets %}<ul class="plain-list">{% for asset in assets %}<li><span>{{ asset.name }} · {{ asset.get_market_display }} · {{ asset.get_subtype_display }}</span><strong>{{ asset.ticker|default:"Sem ticker" }} · {{ asset.currency }}</strong></li>{% endfor %}</ul>{% else %}<p>Nenhum ativo cadastrado.</p>{% endif %}</section></div>{% endblock %}

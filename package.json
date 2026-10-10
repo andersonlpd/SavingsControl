@@ -1,0 +1,10 @@
+{
+  "name": "savingcontrol-assets",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build-assets.mjs"
+  },
+  "dependencies": {
+    "chart.js": "4.5.1"
+  }
+}

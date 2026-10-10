@@ -1,0 +1,37 @@
+{% load saving_tags %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>{% block title %}SavingControl{% endblock %} · SavingControl</title>
+  <link rel="stylesheet" href="{% static_url 'app.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <a class="skip-link" href="#main">Pular para o conteúdo</a>
+  <header class="site-header">
+    <a class="brand" href="{% url 'reports:dashboard' %}">SavingControl</a>
+    {% if request.user.is_authenticated and request.user.is_verified %}
+    <nav aria-label="Navegação principal">
+      <a href="{% url 'reports:dashboard' %}">Resumo</a>
+      <a href="{% url 'portfolio:home' %}">Carteira</a>
+      <a href="{% url 'expenses:home' %}">Gastos</a>
+      <a href="{% url 'integrations:status' %}">Integrações</a>
+    </nav>
+    <form method="post" action="{% url 'account_logout' %}">
+      {% csrf_token %}<button class="link-button" type="submit">Sair</button>
+    </form>
+    {% endif %}
+  </header>
+  <main id="main" class="page">
+    {% if messages %}<div class="messages" role="status" aria-live="polite">
+      {% for message in messages %}<p class="message {{ message.tags }}">{{ message }}</p>{% endfor %}
+    </div>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">Dados para acompanhamento pessoal; não são recomendação nem apuração fiscal.</footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

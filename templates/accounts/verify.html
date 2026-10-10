@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Verificação em duas etapas{% endblock %}
+{% block content %}
+<section class="auth-card" aria-labelledby="verify-title">
+  <p class="eyebrow">Segurança da conta</p>
+  <h1 id="verify-title">Confirme sua identidade</h1>
+  <p>Digite o código do aplicativo autenticador ou use um código de recuperação.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "partials/form_fields.html" %}
+    <button class="button" type="submit">Verificar</button>
+  </form>
+</section>
+{% endblock %}

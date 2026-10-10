@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}Editar categoria{% endblock %}
+{% block content %}<p class="eyebrow">Gastos</p><h1>Corrigir categoria</h1><section class="panel narrow"><p>{{ transaction.transaction_date|date:"d/m/Y" }} · {{ transaction.amount_minor|money_minor:transaction.currency }}{% if transaction.source == "PLUGGY" %} · valor original importado, somente leitura{% endif %}</p><form method="post">{% csrf_token %}{% include "partials/form_fields.html" %}<button class="button" type="submit">Salvar correção</button></form></section>{% endblock %}

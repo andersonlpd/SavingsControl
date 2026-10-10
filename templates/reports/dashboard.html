@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load saving_tags %}
+{% block title %}Resumo{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><p class="eyebrow">{{ today|date:"F Y" }}</p><h1>Seu resumo</h1></div>
+  <div class="quick-actions">
+    <a class="button" href="{% url 'portfolio:operations' %}">Lançar operação</a>
+    <a class="button secondary" href="{% url 'portfolio:income' %}">Lançar provento</a>
+    <a class="button secondary" href="{% url 'expenses:manual' %}">Lançar gasto</a>
+    <a class="button secondary" href="{% url 'portfolio:snapshots' %}">Snapshot histórico</a>
+  </div>
+</div>
+<section class="metric-grid" aria-label="Resumo do mês">
+  <article class="metric"><span>Despesas confirmadas no mês (BRL)</span><strong>{{ monthly_total|money_minor:"BRL" }}</strong></article>
+  <article class="metric"><span>Último patrimônio total informado</span>
+    {% if snapshots %}<strong>{{ snapshots.0.value_minor_brl|money_minor:"BRL" }}</strong><small>{{ snapshots.0.snapshot_date|date:"d/m/Y" }} · {{ snapshots.0.get_source_display }}</small>
+    {% else %}<strong>Sem snapshot</strong><small>Cadastre o primeiro valor para iniciar o histórico.</small>{% endif %}
+  </article>
+  <article class="metric"><span>Última cotação salva</span>
+    {% if quotes %}<strong>{{ quotes.0.asset }}</strong><small>{{ quotes.0.observed_at|date:"d/m/Y H:i" }} · {{ quotes.0.source }}{% if quotes.0.manual %} · manual{% endif %}</small>
+    {% else %}<strong>Sem cotações</strong><small>Os preços ainda não são sincronizados.</small>{% endif %}
+  </article>
+</section>
+<div class="content-grid">
+  <section class="panel">
+    <h2>Histórico total</h2>
+    <p class="muted">Snapshots mensais manuais e totais do app. Não há dados por classe anteriores à implantação.</p>
+    {% if snapshots %}<div class="chart-wrap"><canvas id="portfolio-chart" aria-label="Gráfico do patrimônio total em BRL" role="img"></canvas></div><details><summary>Consultar os dados do gráfico</summary><div class="table-wrap"><table><thead><tr><th>Data</th><th>Patrimônio total</th></tr></thead><tbody>{% for point in chart_data %}<tr><td>{{ point.date }}</td><td>{{ point.value|money:"BRL" }}</td></tr>{% endfor %}</tbody></table></div></details>{% else %}<p>Adicione snapshots mensais em <a href="{% url 'portfolio:snapshots' %}">Histórico</a>.</p>{% endif %}
+    {{ chart_data|json_script:"snapshot-data" }}
+  </section>
+  <section class="panel"><h2>Maiores despesas do mês</h2>
+    {% if top_categories %}<ol class="rank-list">{% for item in top_categories %}<li><span>{{ item.category__name|default:"Revisar" }}</span><strong>{{ item.total|money_minor:"BRL" }}</strong></li>{% endfor %}</ol>{% else %}<p>Nenhuma despesa confirmada neste mês.</p>{% endif %}
+    <a href="{% url 'expenses:home' %}">Ver gastos</a>
+  </section>
+</div>
+<section class="panel"><h2>Limites mensais</h2>
+  {% if budgets %}<div class="table-wrap"><table><thead><tr><th>Categoria</th><th>Gasto</th><th>Limite</th><th>Estado</th></tr></thead><tbody>
+  {% for row in budgets %}<tr><td>{{ row.budget.category.name }}</td><td>{{ row.spent|money_minor:"BRL" }}</td><td>{{ row.budget.limit_minor_brl|money_minor:"BRL" }}</td><td>{% for alert in row.alerts %}<span class="badge warning">{{ alert.threshold }}% atingido</span>{% empty %}<span class="badge">Dentro do limite</span>{% endfor %}</td></tr>{% endfor %}
+  </tbody></table></div>{% else %}<p>Nenhum limite cadastrado para este mês. <a href="{% url 'expenses:budgets' %}">Definir limites</a>.</p>{% endif %}
+</section>
+<div class="content-grid">
+  <section class="panel"><h2>Últimos proventos</h2>{% if income %}<ul class="plain-list">{% for event in income %}<li><span>{{ event.asset }} · {{ event.get_kind_display }} · {{ event.payment_date|date:"d/m/Y" }}</span><strong>{{ event.net_amount_minor|money_minor:event.currency }}</strong></li>{% endfor %}</ul>{% else %}<p>Sem proventos lançados.</p>{% endif %}</section>
+  <section class="panel"><h2>Atualização de preços</h2>{% if quotes %}<ul class="plain-list">{% for quote in quotes %}<li><span>{{ quote.asset }} · {{ quote.observed_at|date:"d/m/Y" }}{% if quote.manual %} · manual{% endif %}</span><strong>{{ quote.price_e8|scaled:8 }} {{ quote.currency }}</strong></li>{% endfor %}</ul>{% else %}<p>Nenhum preço registrado. As cotações devem ser atualizadas manualmente.</p>{% endif %}<a href="{% url 'portfolio:quotes' %}">Gerenciar cotações</a></section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static_url 'vendor/chart.umd.js' %}" defer></script>
+<script src="{% static_url 'dashboard.js' %}" defer></script>
+{% endblock %}

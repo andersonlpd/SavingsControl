@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% load saving_tags %}
+{% block title %}Remover lançamento{% endblock %}
+{% block content %}<p class="eyebrow">Gastos</p><h1>Remover lançamento manual?</h1><section class="panel narrow"><p>{{ transaction.transaction_date|date:"d/m/Y" }} · {{ transaction.description }} · {{ transaction.amount_minor|money_minor:transaction.currency }}</p><p>Os limites do mês serão recalculados. Esta ação não pode ser desfeita.</p><form method="post">{% csrf_token %}<button class="button" type="submit">Confirmar remoção</button> <a href="{% url 'expenses:home' %}">Cancelar</a></form></section>{% endblock %}

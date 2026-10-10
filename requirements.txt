@@ -1,0 +1,4 @@
+Django==5.2.18
+django-two-factor-auth[phonenumberslite]==1.18.1
+django-axes[ipware]==8.3.1
+gunicorn==23.0.0
