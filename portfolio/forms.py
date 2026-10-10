@@ -73,7 +73,11 @@ class InvestmentOperationForm(forms.Form):
         queryset=Asset.objects.filter(active=True, asset_class=Asset.AssetClass.VARIABLE),
         label="Ativo",
     )
-    side = forms.ChoiceField(choices=InvestmentOperation.Side.choices, label="Operação")
+    side = forms.ChoiceField(
+        choices=InvestmentOperation.Side.choices,
+        label="Operação",
+        widget=forms.RadioSelect(attrs={"class": "side-choice"}),
+    )
     trade_date = forms.DateField(
         widget=forms.DateInput(attrs={"type": "date"}), label="Data da operação"
     )
