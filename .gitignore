@@ -1,0 +1,14 @@
+data/
+backups/
+.env
+.env.*
+!.env.example
+*.db
+target/
+.idea/
+*.iml
+.mvn/wrapper/maven-wrapper.jar
+spec/
+.venv/
+node_modules/
+staticfiles/
