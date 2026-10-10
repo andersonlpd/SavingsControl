@@ -15,6 +15,9 @@ class Asset(models.Model):
     class Subtype(models.TextChoices):
         STOCK = "STOCK", "Ação"
         FII = "FII", "FII"
+        ETF = "ETF", "ETF"
+        BDR = "BDR", "BDR"
+        UNIT = "UNIT", "Unit"
         REIT = "REIT", "REIT"
         TREASURY = "TREASURY", "Tesouro Direto"
         CDB = "CDB", "CDB"

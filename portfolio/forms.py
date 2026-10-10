@@ -47,7 +47,14 @@ class AssetForm(forms.ModelForm):
         if market and currency and currency != ("BRL" if market == Asset.Market.BR else "USD"):
             self.add_error("currency", "A moeda deve corresponder ao mercado do ativo.")
         if subtype and asset_class:
-            variable = subtype in {Asset.Subtype.STOCK, Asset.Subtype.FII, Asset.Subtype.REIT}
+            variable = subtype in {
+                Asset.Subtype.STOCK,
+                Asset.Subtype.FII,
+                Asset.Subtype.ETF,
+                Asset.Subtype.BDR,
+                Asset.Subtype.UNIT,
+                Asset.Subtype.REIT,
+            }
             if variable != (asset_class == Asset.AssetClass.VARIABLE):
                 self.add_error("subtype", "O tipo de ativo não corresponde à classe selecionada.")
         if subtype and market:

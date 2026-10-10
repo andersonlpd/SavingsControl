@@ -87,6 +87,12 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); outline: 
 .auth-card { margin: 4vh auto; }
 .subnav { display: flex; flex-wrap: wrap; gap: .6rem 1rem; margin: 1rem 0; }
 .contract-card { padding: 1rem 0; border-top: 1px solid var(--line); }
+.asset-search { margin: 0 0 1.2rem; padding: 1rem; border: 1px solid var(--line); border-radius: .65rem; background: #f7f9fe; }
+.asset-search label { display: block; margin-bottom: .35rem; font-weight: 650; }
+.asset-search-results { margin: .5rem 0 0; padding: 0; list-style: none; }
+.asset-search-results li + li { margin-top: .35rem; }
+.asset-search-results button { width: 100%; padding: .65rem .75rem; border: 1px solid var(--line); border-radius: .45rem; color: var(--blue-dark); background: white; font: inherit; text-align: left; cursor: pointer; }
+.asset-search-results button:hover { background: var(--blue-soft); }
 .compact-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .7rem; align-items: end; margin: .8rem 0; }
 .compact-form .button { grid-column: 1 / -1; justify-self: start; }
 .chart-wrap { height: 280px; }

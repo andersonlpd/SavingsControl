@@ -5,6 +5,7 @@ from portfolio import views
 app_name = "portfolio"
 urlpatterns = [
     path("", views.portfolio_home, name="home"),
+    path("assets/search/", views.asset_search, name="asset_search"),
     path("assets/", views.assets, name="assets"),
     path("operations/", views.operations, name="operations"),
     path("fixed-income/", views.fixed_income, name="fixed_income"),

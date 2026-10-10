@@ -1,3 +1,41 @@
 {% extends "base.html" %}
+{% load saving_tags %}
 {% block title %}Ativos{% endblock %}
-{% block content %}<p class="eyebrow">Carteira</p><h1>Ativos</h1><div class="content-grid"><section class="panel"><h2>Cadastrar ativo</h2><form method="post">{% csrf_token %}{% include "partials/form_fields.html" %}<button class="button" type="submit">Salvar ativo</button></form></section><section class="panel"><h2>Ativos cadastrados</h2>{% if assets %}<ul class="plain-list">{% for asset in assets %}<li><span>{{ asset.name }} · {{ asset.get_market_display }} · {{ asset.get_subtype_display }}</span><strong>{{ asset.ticker|default:"Sem ticker" }} · {{ asset.currency }}</strong></li>{% endfor %}</ul>{% else %}<p>Nenhum ativo cadastrado.</p>{% endif %}</section></div>{% endblock %}
+{% block content %}
+<p class="eyebrow">Carteira</p>
+<h1>Ativos</h1>
+<div class="content-grid">
+  <section class="panel">
+    <h2>Cadastrar ativo</h2>
+    <div class="asset-search">
+      <label for="brapi-search">Buscar ação, FII, ETF, BDR ou Unit da B3</label>
+      <input id="brapi-search" type="search" maxlength="80" autocomplete="off"
+        aria-controls="brapi-results" data-search-url="{% url 'portfolio:asset_search' %}">
+      <p id="brapi-search-status" class="muted" role="status" aria-live="polite"></p>
+      <ul id="brapi-results" class="asset-search-results" aria-label="Resultados da busca"></ul>
+      <p class="muted">Catálogo da <a href="https://brapi.dev">brapi.dev</a>. Ativos dos EUA e de renda fixa continuam cadastrados manualmente.</p>
+    </div>
+    <form id="asset-form" method="post">
+      {% csrf_token %}
+      {% include "partials/form_fields.html" %}
+      <button class="button" type="submit">Salvar ativo</button>
+    </form>
+  </section>
+  <section class="panel">
+    <h2>Ativos cadastrados</h2>
+    {% if assets %}
+    <ul class="plain-list">
+      {% for asset in assets %}
+      <li>
+        <span>{{ asset.name }} · {{ asset.get_market_display }} · {{ asset.get_subtype_display }}</span>
+        <strong>{{ asset.ticker|default:"Sem ticker" }} · {{ asset.currency }}</strong>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>Nenhum ativo cadastrado.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static_url 'assets.js' %}" defer></script>{% endblock %}
