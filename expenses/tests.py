@@ -57,7 +57,7 @@ class ExpenseRulesAndLimitsTests(TestCase):
         self.assertEqual(BudgetAlert.objects.filter(active=True).count(), 2)
 
     def test_removing_a_transaction_deactivates_its_month_alert(self):
-        category = Category.objects.create(name="Transporte")
+        category = Category.objects.get(name="Transporte")
         budget = Budget.objects.create(
             category=category, month=date(2026, 10, 1), limit_minor_brl=10_000
         )
