@@ -78,6 +78,11 @@ class OperationFormTests(DjangoTestCase):
         self.assertEqual(saved.unit_price_e8, 1_212_345_678)
         self.assertEqual(saved.fees_minor, 34)
 
+    def test_operation_form_labels_are_in_portuguese(self):
+        form = self.form()
+        self.assertEqual(form.fields["trade_date"].label, "Data da operação")
+        self.assertEqual(form.fields["unit_price"].label, "Preço unitário")
+
     def test_backdated_operation_preserves_all_future_sale_balances(self):
         InvestmentOperation.objects.create(
             asset=self.asset,
