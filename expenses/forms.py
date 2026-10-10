@@ -22,7 +22,13 @@ class ManualExpenseForm(forms.Form):
     )
     description = forms.CharField(max_length=240, label="Descrição")
     amount = forms.DecimalField(
-        max_digits=18, decimal_places=2, min_value=Decimal("0.01"), label="Valor"
+        max_digits=18,
+        decimal_places=2,
+        min_value=Decimal("0.01"),
+        localize=True,
+        widget=forms.TextInput(attrs={"inputmode": "decimal"}),
+        label="Valor",
+        help_text="Use vírgula para os centavos, por exemplo: 1234,56.",
     )
     currency = forms.ChoiceField(
         choices=ExpenseTransaction.Currency.choices, initial="BRL", label="Moeda"

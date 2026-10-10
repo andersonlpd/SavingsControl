@@ -1,7 +1,9 @@
 from datetime import date
+from decimal import Decimal
 
 from django.template.loader import render_to_string
 from django.test import TestCase
+from django.utils import timezone
 
 from expenses.forms import ManualExpenseForm
 from expenses.models import Budget, BudgetAlert, Category, ExpenseTransaction
@@ -10,6 +12,7 @@ from expenses.services import (
     reconcile_budget_alerts,
     reconcile_transaction_budgets,
 )
+from reports.templatetags.saving_tags import money_minor
 
 
 class ExpenseRulesAndLimitsTests(TestCase):
@@ -71,3 +74,18 @@ class ExpenseRulesAndLimitsTests(TestCase):
     def test_manual_expense_date_has_today_button(self):
         html = render_to_string("partials/form_fields.html", {"form": ManualExpenseForm()})
         self.assertIn('id="set-transaction-today"', html)
+
+    def test_manual_expense_accepts_brazilian_decimal_and_formats_reais(self):
+        form = ManualExpenseForm(
+            data={
+                "transaction_date": timezone.localdate().isoformat(),
+                "description": "Mercado",
+                "amount": "1234,56",
+                "currency": "BRL",
+                "direction": "DEBIT",
+                "category": "",
+            }
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["amount"], Decimal("1234.56"))
+        self.assertEqual(money_minor(123456), "R$ 1.234,56")
