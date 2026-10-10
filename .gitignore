@@ -1,14 +1,29 @@
-data/
-backups/
+# Local data and backups (SavingControl stores SQLite under data/ by default).
+/data/
+/backups/
 .env
 .env.*
 !.env.example
 *.db
-target/
-.idea/
-*.iml
-.mvn/wrapper/maven-wrapper.jar
-spec/
+
+# Python / Django.
+__pycache__/
+*.py[cod]
 .venv/
+venv/
+ENV/
+/.ruff_cache/
+/.pytest_cache/
+.coverage
+htmlcov/
+*.sqlite3*
+/staticfiles/
+
+# Node assets.
 node_modules/
-staticfiles/
+npm-debug.log*
+
+# Local editor and OS files.
+.idea/
+.vscode/
+.DS_Store
