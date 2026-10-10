@@ -54,6 +54,7 @@ class RecoveryCodeTests(TestCase):
         totp.time = time.time()
         response = self.client.post("/account/verify/", {"token": str(totp.token()).zfill(6)})
         self.assertRedirects(response, "/dashboard/", fetch_redirect_response=False)
+        self.assertEqual(self.client.get("/account/two_factor/").status_code, 200)
         for url in ("/dashboard/", "/portfolio/", "/expenses/", "/settings/integrations/"):
             with self.subTest(url=url):
                 self.assertEqual(self.client.get(url).status_code, 200)

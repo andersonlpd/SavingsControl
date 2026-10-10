@@ -17,7 +17,7 @@ otp_patterns = [
     *(
         pattern
         for pattern in two_factor_urlpatterns[0]
-        if pattern.name not in {"login", "backup_tokens"}
+        if pattern.name != "login"
     ),
 ]
 
