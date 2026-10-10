@@ -29,6 +29,14 @@ class AssetForm(forms.ModelForm):
     class Meta:
         model = Asset
         fields = ["name", "market", "ticker", "asset_class", "subtype", "currency"]
+        labels = {
+            "name": "Nome",
+            "market": "Mercado",
+            "ticker": "Ticker",
+            "asset_class": "Classe do ativo",
+            "subtype": "Tipo de ativo",
+            "currency": "Moeda",
+        }
 
     def clean(self):
         cleaned = super().clean()
@@ -39,7 +47,14 @@ class AssetForm(forms.ModelForm):
         if market and currency and currency != ("BRL" if market == Asset.Market.BR else "USD"):
             self.add_error("currency", "A moeda deve corresponder ao mercado do ativo.")
         if subtype and asset_class:
-            variable = subtype in {Asset.Subtype.STOCK, Asset.Subtype.FII, Asset.Subtype.REIT}
+            variable = subtype in {
+                Asset.Subtype.STOCK,
+                Asset.Subtype.FII,
+                Asset.Subtype.ETF,
+                Asset.Subtype.BDR,
+                Asset.Subtype.UNIT,
+                Asset.Subtype.REIT,
+            }
             if variable != (asset_class == Asset.AssetClass.VARIABLE):
                 self.add_error("subtype", "O tipo de ativo não corresponde à classe selecionada.")
         if subtype and market:
@@ -62,21 +77,38 @@ class AssetForm(forms.ModelForm):
 
 class InvestmentOperationForm(forms.Form):
     asset = forms.ModelChoiceField(
-        queryset=Asset.objects.filter(active=True, asset_class=Asset.AssetClass.VARIABLE)
+        queryset=Asset.objects.filter(active=True, asset_class=Asset.AssetClass.VARIABLE),
+        label="Ativo",
     )
-    side = forms.ChoiceField(choices=InvestmentOperation.Side.choices)
-    trade_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
-    quantity = forms.DecimalField(max_digits=18, decimal_places=6, min_value=Decimal("0.000001"))
+    side = forms.ChoiceField(
+        choices=InvestmentOperation.Side.choices,
+        label="Operação",
+        widget=forms.RadioSelect(attrs={"class": "side-choice"}),
+    )
+    trade_date = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date"}), label="Data da operação"
+    )
+    quantity = forms.DecimalField(
+        max_digits=18, decimal_places=6, min_value=Decimal("0.000001"), label="Quantidade"
+    )
     unit_price = forms.DecimalField(
-        max_digits=18, decimal_places=8, min_value=Decimal("0.00000001")
+        max_digits=18, decimal_places=8, min_value=Decimal("0.00000001"), label="Preço unitário"
     )
-    fees = forms.DecimalField(max_digits=18, decimal_places=2, min_value=0, initial=0)
-    taxes = forms.DecimalField(max_digits=18, decimal_places=2, min_value=0, initial=0)
-    currency = forms.ChoiceField(choices=Asset.Currency.choices)
+    fees = forms.DecimalField(
+        max_digits=18, decimal_places=2, min_value=0, initial=0, label="Taxas"
+    )
+    taxes = forms.DecimalField(
+        max_digits=18, decimal_places=2, min_value=0, initial=0, label="Impostos"
+    )
+    currency = forms.ChoiceField(choices=Asset.Currency.choices, label="Moeda")
     fx_to_brl = forms.DecimalField(
-        max_digits=18, decimal_places=8, min_value=Decimal("0.00000001"), required=False
+        max_digits=18,
+        decimal_places=8,
+        min_value=Decimal("0.00000001"),
+        required=False,
+        label="Câmbio para BRL",
     )
-    note = forms.CharField(max_length=500, required=False)
+    note = forms.CharField(max_length=500, required=False, label="Observação")
 
     def clean(self):
         cleaned = super().clean()
@@ -126,15 +158,30 @@ class InvestmentOperationForm(forms.Form):
 
 class FixedIncomeContractForm(forms.Form):
     asset = forms.ModelChoiceField(
-        queryset=Asset.objects.filter(active=True, asset_class=Asset.AssetClass.FIXED)
+        queryset=Asset.objects.filter(active=True, asset_class=Asset.AssetClass.FIXED),
+        label="Ativo",
     )
-    principal = forms.DecimalField(max_digits=18, decimal_places=2, min_value=Decimal("0.01"))
-    application_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
-    maturity_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
-    indexer = forms.ChoiceField(choices=FixedIncomeContract.Indexer.choices)
-    contract_rate = forms.DecimalField(max_digits=18, decimal_places=8, min_value=0)
-    rate_unit = forms.ChoiceField(choices=FixedIncomeContract.RateUnit.choices, initial="ANNUAL")
-    liquidity_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}), required=False)
+    principal = forms.DecimalField(
+        max_digits=18, decimal_places=2, min_value=Decimal("0.01"), label="Valor aplicado"
+    )
+    application_date = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date"}), label="Data da aplicação"
+    )
+    maturity_date = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date"}), label="Data de vencimento"
+    )
+    indexer = forms.ChoiceField(choices=FixedIncomeContract.Indexer.choices, label="Indexador")
+    contract_rate = forms.DecimalField(
+        max_digits=18, decimal_places=8, min_value=0, label="Taxa contratada"
+    )
+    rate_unit = forms.ChoiceField(
+        choices=FixedIncomeContract.RateUnit.choices,
+        initial="ANNUAL",
+        label="Periodicidade da taxa",
+    )
+    liquidity_date = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date"}), required=False, label="Data de liquidez"
+    )
     tax_exempt = forms.BooleanField(
         required=False, label="Regime isento (confirmado para este produto)"
     )
@@ -178,14 +225,22 @@ class FixedIncomeContractForm(forms.Form):
 
 
 class RedemptionForm(forms.Form):
-    date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
-    gross_amount = forms.DecimalField(max_digits=18, decimal_places=2, min_value=Decimal("0.01"))
-    principal_redeemed = forms.DecimalField(
-        max_digits=18, decimal_places=2, min_value=Decimal("0.01")
+    date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}), label="Data do resgate")
+    gross_amount = forms.DecimalField(
+        max_digits=18, decimal_places=2, min_value=Decimal("0.01"), label="Valor bruto"
     )
-    withheld_tax = forms.DecimalField(max_digits=18, decimal_places=2, min_value=0, initial=0)
-    fees = forms.DecimalField(max_digits=18, decimal_places=2, min_value=0, initial=0)
-    net_amount = forms.DecimalField(max_digits=18, decimal_places=2, min_value=Decimal("0.01"))
+    principal_redeemed = forms.DecimalField(
+        max_digits=18, decimal_places=2, min_value=Decimal("0.01"), label="Principal resgatado"
+    )
+    withheld_tax = forms.DecimalField(
+        max_digits=18, decimal_places=2, min_value=0, initial=0, label="Imposto retido"
+    )
+    fees = forms.DecimalField(
+        max_digits=18, decimal_places=2, min_value=0, initial=0, label="Taxas"
+    )
+    net_amount = forms.DecimalField(
+        max_digits=18, decimal_places=2, min_value=Decimal("0.01"), label="Valor líquido"
+    )
 
     def __init__(self, *args, contract, **kwargs):
         self.contract = contract
@@ -228,17 +283,29 @@ class RedemptionForm(forms.Form):
 
 
 class IncomeEventForm(forms.Form):
-    asset = forms.ModelChoiceField(queryset=Asset.objects.filter(active=True))
-    kind = forms.ChoiceField(choices=IncomeEvent.Kind.choices)
-    payment_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
-    gross_amount = forms.DecimalField(max_digits=18, decimal_places=2, min_value=Decimal("0.01"))
-    withheld_tax = forms.DecimalField(max_digits=18, decimal_places=2, min_value=0, initial=0)
-    net_amount = forms.DecimalField(max_digits=18, decimal_places=2, min_value=Decimal("0.01"))
-    currency = forms.ChoiceField(choices=Asset.Currency.choices)
-    fx_to_brl = forms.DecimalField(
-        max_digits=18, decimal_places=8, min_value=Decimal("0.00000001"), required=False
+    asset = forms.ModelChoiceField(queryset=Asset.objects.filter(active=True), label="Ativo")
+    kind = forms.ChoiceField(choices=IncomeEvent.Kind.choices, label="Tipo do provento")
+    payment_date = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date"}), label="Data do pagamento"
     )
-    note = forms.CharField(max_length=500, required=False)
+    gross_amount = forms.DecimalField(
+        max_digits=18, decimal_places=2, min_value=Decimal("0.01"), label="Valor bruto"
+    )
+    withheld_tax = forms.DecimalField(
+        max_digits=18, decimal_places=2, min_value=0, initial=0, label="Imposto retido"
+    )
+    net_amount = forms.DecimalField(
+        max_digits=18, decimal_places=2, min_value=Decimal("0.01"), label="Valor líquido"
+    )
+    currency = forms.ChoiceField(choices=Asset.Currency.choices, label="Moeda")
+    fx_to_brl = forms.DecimalField(
+        max_digits=18,
+        decimal_places=8,
+        min_value=Decimal("0.00000001"),
+        required=False,
+        label="Câmbio para BRL",
+    )
+    note = forms.CharField(max_length=500, required=False, label="Observação")
 
     def clean(self):
         cleaned = super().clean()
@@ -286,9 +353,11 @@ class IncomeEventForm(forms.Form):
 
 
 class ManualQuoteForm(forms.Form):
-    asset = forms.ModelChoiceField(queryset=Asset.objects.filter(active=True))
-    date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
-    price = forms.DecimalField(max_digits=18, decimal_places=8, min_value=Decimal("0.00000001"))
+    asset = forms.ModelChoiceField(queryset=Asset.objects.filter(active=True), label="Ativo")
+    date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}), label="Data da cotação")
+    price = forms.DecimalField(
+        max_digits=18, decimal_places=8, min_value=Decimal("0.00000001"), label="Preço unitário"
+    )
 
     def clean_date(self):
         quote_date = self.cleaned_data["date"]
@@ -309,8 +378,12 @@ class ManualQuoteForm(forms.Form):
 
 
 class ManualValuationForm(forms.Form):
-    observed_at = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
-    gross_amount = forms.DecimalField(max_digits=18, decimal_places=2, min_value=Decimal("0.01"))
+    observed_at = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date"}), label="Data do saldo informado"
+    )
+    gross_amount = forms.DecimalField(
+        max_digits=18, decimal_places=2, min_value=Decimal("0.01"), label="Saldo bruto"
+    )
 
     def clean_observed_at(self):
         observed_at = self.cleaned_data["observed_at"]
@@ -331,7 +404,9 @@ class SnapshotForm(forms.Form):
     month = forms.CharField(
         label="Mês de referência", max_length=7, widget=forms.TextInput(attrs={"type": "month"})
     )
-    value = forms.DecimalField(max_digits=18, decimal_places=2, min_value=Decimal("0.01"))
+    value = forms.DecimalField(
+        max_digits=18, decimal_places=2, min_value=Decimal("0.01"), label="Patrimônio total (R$)"
+    )
 
     def clean_month(self):
         raw = self.cleaned_data["month"]

@@ -12,7 +12,7 @@ def money_minor(value, currency="BRL"):
         amount = Decimal(value) / Decimal(100)
     except (TypeError, ValueError, ArithmeticError):
         amount = Decimal(0)
-    return f"{currency} {format_decimal(amount, 2)}"
+    return f"{'R$' if currency == 'BRL' else currency} {format_decimal(amount, 2)}"
 
 
 @register.filter
@@ -21,7 +21,7 @@ def money(value, currency="BRL"):
         amount = Decimal(value)
     except (TypeError, ValueError, ArithmeticError):
         amount = Decimal(0)
-    return f"{currency} {format_decimal(amount, 2)}"
+    return f"{'R$' if currency == 'BRL' else currency} {format_decimal(amount, 2)}"
 
 
 @register.filter

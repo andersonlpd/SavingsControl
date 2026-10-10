@@ -3,9 +3,10 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.db import IntegrityError
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 from django_otp.decorators import otp_required
 
 from portfolio.forms import (
@@ -30,6 +31,7 @@ from portfolio.services import (
     PRICE_SCALE,
     calculate_position,
     from_scaled,
+    search_brapi_assets,
 )
 
 
@@ -114,6 +116,23 @@ def assets(request):
             messages.success(request, "Ativo cadastrado.")
             return redirect("portfolio:assets")
     return render(request, "portfolio/assets.html", {"form": form, "assets": Asset.objects.all()})
+
+
+@otp_required
+@require_GET
+def asset_search(request):
+    query = request.GET.get("q", "").strip()
+    if len(query) < 2:
+        return JsonResponse({"results": []})
+    if len(query) > 80:
+        return JsonResponse({"error": "A busca deve ter até 80 caracteres."}, status=400)
+    try:
+        results = search_brapi_assets(query)
+    except (OSError, ValueError):
+        return JsonResponse(
+            {"error": "Não foi possível consultar o catálogo da brapi."}, status=502
+        )
+    return JsonResponse({"results": results})
 
 
 @otp_required

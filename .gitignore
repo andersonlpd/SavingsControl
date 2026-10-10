@@ -1,0 +1,29 @@
+# Local data and backups (SavingControl stores SQLite under data/ by default).
+/data/
+/backups/
+.env
+.env.*
+!.env.example
+*.db
+
+# Python / Django.
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+ENV/
+/.ruff_cache/
+/.pytest_cache/
+.coverage
+htmlcov/
+*.sqlite3*
+/staticfiles/
+
+# Node assets.
+node_modules/
+npm-debug.log*
+
+# Local editor and OS files.
+.idea/
+.vscode/
+.DS_Store

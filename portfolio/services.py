@@ -1,10 +1,71 @@
+import json
 from collections.abc import Iterable
 from dataclasses import dataclass
 from decimal import Decimal
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
 MONEY_SCALE = Decimal(100)
 QUANTITY_SCALE = Decimal(1_000_000)
 PRICE_SCALE = Decimal(100_000_000)
+
+BRAPI_SUBTYPES = {
+    "stock": "STOCK",
+    "fii": "FII",
+    "etf": "ETF",
+    "bdr": "BDR",
+    "unit": "UNIT",
+}
+
+
+def search_brapi_assets(query):
+    params = urlencode({"search": query, "limit": 30})
+    request = Request(
+        f"https://brapi.dev/api/v2/tickers?{params}",
+        headers={"Accept": "application/json", "User-Agent": "SavingControl"},
+    )
+    with urlopen(request, timeout=5) as response:
+        payload = json.load(response)
+
+    if not isinstance(payload, dict) or not isinstance(payload.get("results"), list):
+        return []
+
+    assets = []
+    for item in payload["results"]:
+        if not isinstance(item, dict):
+            continue
+        brapi_subtype = item.get("subType")
+        subtype = BRAPI_SUBTYPES.get(brapi_subtype) if isinstance(brapi_subtype, str) else None
+        asset_type = item.get("assetType")
+        symbol = item.get("symbol")
+        name = item.get("name") or item.get("longName")
+        if (
+            not subtype
+            or not isinstance(asset_type, str)
+            or asset_type not in {"stock", "fund", "bdr"}
+            or item.get("exchange") != "B3"
+            or item.get("currency") != "BRL"
+            or item.get("isActive") is False
+            or not isinstance(symbol, str)
+            or not isinstance(name, str)
+        ):
+            continue
+        symbol, name = symbol.strip(), name.strip()
+        if not symbol or not name or len(symbol) > 24 or len(name) > 120:
+            continue
+        assets.append(
+            {
+                "symbol": symbol,
+                "name": name,
+                "market": "BR",
+                "asset_class": "VARIABLE_INCOME",
+                "subtype": subtype,
+                "currency": "BRL",
+            }
+        )
+        if len(assets) == 10:
+            break
+    return assets
 
 
 def to_scaled(value: Decimal, scale: Decimal) -> int:

@@ -15,6 +15,8 @@ from accounts.models import RecoveryDevice
 @never_cache
 @require_http_methods(["GET", "POST"])
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect("reports:dashboard")
     form = LoginForm(request, data=request.POST or None)
     if request.method == "POST" and form.is_valid():
         user = form.get_user()

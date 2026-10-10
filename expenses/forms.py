@@ -17,12 +17,28 @@ from portfolio.services import MONEY_SCALE, to_scaled
 
 
 class ManualExpenseForm(forms.Form):
-    transaction_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
-    description = forms.CharField(max_length=240)
-    amount = forms.DecimalField(max_digits=18, decimal_places=2, min_value=Decimal("0.01"))
-    currency = forms.ChoiceField(choices=ExpenseTransaction.Currency.choices, initial="BRL")
-    direction = forms.ChoiceField(choices=ExpenseTransaction.Direction.choices, initial="DEBIT")
-    category = forms.ModelChoiceField(queryset=Category.objects.filter(active=True), required=False)
+    transaction_date = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date"}), label="Data da transação"
+    )
+    description = forms.CharField(max_length=240, label="Descrição")
+    amount = forms.DecimalField(
+        max_digits=18,
+        decimal_places=2,
+        min_value=Decimal("0.01"),
+        localize=True,
+        widget=forms.TextInput(attrs={"inputmode": "decimal"}),
+        label="Valor",
+        help_text="Use vírgula para os centavos, por exemplo: 1234,56.",
+    )
+    currency = forms.ChoiceField(
+        choices=ExpenseTransaction.Currency.choices, initial="BRL", label="Moeda"
+    )
+    direction = forms.ChoiceField(
+        choices=ExpenseTransaction.Direction.choices, initial="DEBIT", label="Tipo de lançamento"
+    )
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.filter(active=True), required=False, label="Categoria"
+    )
 
     def clean_transaction_date(self):
         transaction_date = self.cleaned_data["transaction_date"]
@@ -54,8 +70,10 @@ class ManualExpenseForm(forms.Form):
 
 
 class TransactionCategoryForm(forms.Form):
-    description = forms.CharField(max_length=240)
-    category = forms.ModelChoiceField(queryset=Category.objects.filter(active=True))
+    description = forms.CharField(max_length=240, label="Descrição")
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.filter(active=True), label="Categoria"
+    )
     create_rule = forms.BooleanField(
         required=False, label="Usar esta categoria para descrições idênticas no futuro"
     )
@@ -81,21 +99,29 @@ class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
         fields = ["name", "group", "active"]
+        labels = {"name": "Nome", "group": "Grupo", "active": "Ativa"}
 
 
 class CategoryRuleForm(forms.ModelForm):
     class Meta:
         model = CategoryRule
         fields = ["pattern", "category"]
+        labels = {"pattern": "Descrição identificadora", "category": "Categoria"}
 
     def clean_pattern(self):
         return normalize_description(self.cleaned_data["pattern"])
 
 
 class BudgetForm(forms.Form):
-    category = forms.ModelChoiceField(queryset=Category.objects.filter(active=True))
-    month = forms.CharField(max_length=7, widget=forms.TextInput(attrs={"type": "month"}))
-    limit = forms.DecimalField(max_digits=18, decimal_places=2, min_value=Decimal("0.01"))
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.filter(active=True), label="Categoria"
+    )
+    month = forms.CharField(
+        max_length=7, widget=forms.TextInput(attrs={"type": "month"}), label="Mês de referência"
+    )
+    limit = forms.DecimalField(
+        max_digits=18, decimal_places=2, min_value=Decimal("0.01"), label="Limite mensal"
+    )
 
     def clean_month(self):
         try:

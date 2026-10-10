@@ -11,8 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
       datasets: [{
         label: "Patrimônio total (BRL)",
         data: snapshots.map((item) => ({ y: Number(item.value), exact: item.value })),
-        borderColor: "#0c735b",
-        backgroundColor: "rgba(12, 115, 91, .12)",
+        borderColor: "#3566c4",
+        backgroundColor: "rgba(53, 102, 196, .12)",
         fill: true,
         tension: 0.2,
       }],

@@ -10,6 +10,21 @@ from accounts.models import RecoveryDevice, RecoveryToken
 
 @override_settings(SECURE_SSL_REDIRECT=False)
 class RecoveryCodeTests(TestCase):
+    def test_root_redirects_to_login(self):
+        response = self.client.get("/")
+        self.assertRedirects(response, "/account/login/", fetch_redirect_response=False)
+
+    def test_two_factor_setup_uses_application_template(self):
+        user = get_user_model().objects.create_user(
+            username="owner", password="a-long-test-password"
+        )
+        self.client.force_login(user)
+        response = self.client.get("/account/login/")
+        self.assertRedirects(response, "/dashboard/", fetch_redirect_response=False)
+        response = self.client.get("/account/two_factor/setup/")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Provide a template named")
+
     def test_codes_are_hashed_and_consumed_once(self):
         user = get_user_model().objects.create_user(
             username="owner", password="a-long-test-password"
@@ -41,6 +56,7 @@ class RecoveryCodeTests(TestCase):
         totp.time = time.time()
         response = self.client.post("/account/verify/", {"token": str(totp.token()).zfill(6)})
         self.assertRedirects(response, "/dashboard/", fetch_redirect_response=False)
+        self.assertEqual(self.client.get("/account/two_factor/").status_code, 200)
         for url in ("/dashboard/", "/portfolio/", "/expenses/", "/settings/integrations/"):
             with self.subTest(url=url):
                 self.assertEqual(self.client.get(url).status_code, 200)
