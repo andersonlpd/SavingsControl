@@ -73,7 +73,7 @@ input[type=checkbox], input[type=radio] { display: inline-block; width: 1.1rem; 
   .field:has(.side-choice) > div { display: flex; gap: .6rem; }
   .field:has(.side-choice) > div > div { flex: 1; }
   .field label:has(.side-choice) { display: flex; align-items: center; justify-content: center; min-height: 2.65rem; margin: 0; padding: .55rem .9rem; border: 1px solid var(--line); border-radius: .55rem; background: white; cursor: pointer; }
-  .side-choice { position: absolute; width: 1px; min-height: 0; padding: 0; opacity: 0; }
+  input.side-choice { position: absolute; width: 1px; min-height: 0; padding: 0; opacity: 0; }
   .field label:has(.side-choice[value="BUY"]) { border-color: #16803c; color: #146c32; }
   .field label:has(.side-choice[value="SELL"]) { border-color: #b4232e; color: #a21d27; }
   .field label:has(.side-choice[value="BUY"]:checked) { color: white; background: #16803c; }

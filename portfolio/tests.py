@@ -82,7 +82,10 @@ class OperationFormTests(DjangoTestCase):
         form = self.form()
         self.assertEqual(form.fields["trade_date"].label, "Data da operação")
         self.assertEqual(form.fields["unit_price"].label, "Preço unitário")
-        self.assertIn('type="radio"', str(form["side"]))
+        side = str(form["side"])
+        self.assertIn('type="radio"', side)
+        self.assertIn('value="BUY"', side)
+        self.assertIn('value="SELL"', side)
 
     def test_backdated_operation_preserves_all_future_sale_balances(self):
         InvestmentOperation.objects.create(
