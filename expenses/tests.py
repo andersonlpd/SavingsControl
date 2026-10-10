@@ -16,6 +16,11 @@ from reports.templatetags.saving_tags import money_minor
 
 
 class ExpenseRulesAndLimitsTests(TestCase):
+    def test_default_expense_categories_are_seeded(self):
+        self.assertTrue(Category.objects.filter(name="Alimentação", active=True).exists())
+        self.assertTrue(Category.objects.filter(name="Moradia", active=True).exists())
+        self.assertTrue(Category.objects.filter(name="Outros", active=True).exists())
+
     def test_normalization_is_accent_and_case_insensitive(self):
         self.assertEqual(normalize_description("  CAFÉ   São José "), "cafe sao jose")
 
