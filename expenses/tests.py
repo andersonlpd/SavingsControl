@@ -1,7 +1,9 @@
 from datetime import date
 
+from django.template.loader import render_to_string
 from django.test import TestCase
 
+from expenses.forms import ManualExpenseForm
 from expenses.models import Budget, BudgetAlert, Category, ExpenseTransaction
 from expenses.services import (
     normalize_description,
@@ -65,3 +67,7 @@ class ExpenseRulesAndLimitsTests(TestCase):
         item.delete()
         reconcile_transaction_budgets(item, category, date(2026, 10, 8))
         self.assertFalse(BudgetAlert.objects.get(budget=budget, threshold=80).active)
+
+    def test_manual_expense_date_has_today_button(self):
+        html = render_to_string("partials/form_fields.html", {"form": ManualExpenseForm()})
+        self.assertIn('id="set-transaction-today"', html)
