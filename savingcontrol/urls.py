@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.urls import include, path
-from django.views.generic import RedirectView
 from django.views.decorators.http import require_GET
+from django.views.generic import RedirectView
 from two_factor.urls import urlpatterns as two_factor_urlpatterns
 
 from accounts.views import login_view, logout_view
