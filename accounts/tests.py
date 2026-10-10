@@ -10,6 +10,10 @@ from accounts.models import RecoveryDevice, RecoveryToken
 
 @override_settings(SECURE_SSL_REDIRECT=False)
 class RecoveryCodeTests(TestCase):
+    def test_root_redirects_to_login(self):
+        response = self.client.get("/")
+        self.assertRedirects(response, "/account/login/", fetch_redirect_response=False)
+
     def test_codes_are_hashed_and_consumed_once(self):
         user = get_user_model().objects.create_user(
             username="owner", password="a-long-test-password"
